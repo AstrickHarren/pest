@@ -108,6 +108,7 @@ fn generate_builtin_rules() -> Vec<(&'static str, TokenStream)> {
     insert_builtin!(builtins, SOI, state.start_of_input());
     insert_builtin!(builtins, PEEK, state.stack_peek());
     insert_builtin!(builtins, PEEK_ALL, state.stack_match_peek());
+    insert_builtin!(builtins, PEEK_ANY, state.stack_peek_any());
     insert_builtin!(builtins, POP, state.stack_pop());
     insert_builtin!(builtins, POP_ALL, state.stack_match_pop());
     insert_builtin!(builtins, DROP, state.stack_drop());

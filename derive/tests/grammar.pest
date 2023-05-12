@@ -43,6 +43,7 @@ will_fail = { repeat_mutate_stack_pop_all ~ "FAIL" }
 stack_resume_after_fail = { will_fail | repeat_mutate_stack_pop_all }
 peek_ = { PUSH(range) ~ PUSH(range) ~ PEEK ~ PEEK }
 peek_all = { PUSH(range) ~ PUSH(range) ~ PEEK_ALL }
+peek_any = { PUSH(range) ~ PUSH(range) ~ PEEK_ANY ~ PEEK_ANY ~ PUSH(range) ~ PUSH(range) ~ PEEK_ANY }
 peek_slice_23 = { PUSH(range) ~ PUSH(range) ~ PUSH(range) ~ PUSH(range) ~ PUSH(range) ~ PEEK[1..-2] }
 pop_ = { PUSH(range) ~ PUSH(range) ~ POP ~ POP }
 pop_all = { PUSH(range) ~ PUSH(range) ~ POP_ALL }

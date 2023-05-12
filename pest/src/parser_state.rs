@@ -1035,6 +1035,52 @@ impl<'i, R: RuleType> ParserState<'i, R> {
         self.match_string(string)
     }
 
+    /// Attempts to match any of the stack content. Returns `Ok(Box<ParserState>)`
+    /// if any string is matched successfully, or `Err(Box<ParserState>)` otherwise.
+    /// # Examples
+    ///
+    /// ```
+    /// # use pest;
+    /// # #[allow(non_camel_case_types)]
+    /// # #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    /// enum Rule {}
+    ///
+    /// let input = "aba";
+    /// let mut state: Box<pest::ParserState<'_, Rule>> = pest::ParserState::new(input);
+    /// let mut result = state.stack_push(|state| state.match_string("a")).and_then(
+    ///     |state| state.stack_push(|state| state.match_string("b"))
+    /// ).and_then(
+    ///     |state| state.stack_peek_any()
+    /// );
+    /// assert!(result.is_ok());
+    /// assert_eq!(result.unwrap().position().pos(), 3);
+    /// ```
+    #[inline]
+    pub fn stack_peek_any(mut self: Box<Self>) -> ParseResult<Box<Self>> {
+        let range = match constrain_idxs(0, None, self.stack.len()) {
+            Some(r) => r,
+            None => return Err(self),
+        };
+        // return true if an empty sequence is requested
+        if range.end <= range.start {
+            return Ok(self);
+        }
+
+        let mut position = self.position;
+        let result = {
+            let mut iter_b2t = self.stack[range].iter();
+            let matcher = |span: &Span<'_>| position.match_string(span.as_str());
+            iter_b2t.any(matcher)
+        };
+
+        if result {
+            self.position = position;
+            Ok(self)
+        } else {
+            Err(self)
+        }
+    }
+
     /// Pops the top of the stack and attempts to match the string. Returns `Ok(Box<ParserState>)`
     /// if the string is matched successfully, or `Err(Box<ParserState>)` otherwise.
     ///

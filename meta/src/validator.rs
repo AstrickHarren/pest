@@ -49,6 +49,7 @@ static BUILTINS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
         "EOI",
         "PEEK",
         "PEEK_ALL",
+        "PEEK_ANY",
         "POP",
         "POP_ALL",
         "SOI",

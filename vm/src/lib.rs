@@ -89,6 +89,7 @@ impl Vm {
             "SOI" => return state.start_of_input(),
             "PEEK" => return state.stack_peek(),
             "PEEK_ALL" => return state.stack_match_peek(),
+            "PEEK_ANY" => return state.stack_peek_any(),
             "POP" => return state.stack_pop(),
             "POP_ALL" => return state.stack_match_pop(),
             "DROP" => return state.stack_drop(),
