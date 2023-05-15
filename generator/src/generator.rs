@@ -84,6 +84,79 @@ pub(crate) fn generate(
                     }
                 })
             }
+
+            fn parse_with_stack<'i>(
+                rule: Rule,
+                input: &'i str,
+                stack: ::pest::Stack<::pest::Span<'i>>
+            ) -> #result<(
+                ::pest::iterators::Pairs<'i, Rule>,
+                ::pest::Stack<::pest::Span<'i>>
+            ),
+                ::pest::error::Error<Rule>
+            > {
+                mod rules {
+                    #![allow(clippy::upper_case_acronyms)]
+                    pub mod hidden {
+                        use super::super::Rule;
+                        #skip
+                    }
+
+                    pub mod visible {
+                        use super::super::Rule;
+                        #( #rules )*
+                    }
+
+                    pub use self::visible::*;
+                }
+
+                let ret = ::pest::state_with_stack(input, stack, |state| {
+                    match rule {
+                        #patterns
+                    }
+                });
+
+                ret
+            }
+        }
+    };
+
+    let parse_with_stack = quote! {
+        #[allow(clippy::all)]
+        impl #impl_generics ::pest::ParseWithStack<Rule> for #name #ty_generics #where_clause {
+            fn parse_with_stack<'i>(
+                rule: Rule,
+                input: &'i str,
+                stack: ::pest::Stack<::pest::Span<'i>>
+            ) -> #result<(
+                ::pest::iterators::Pairs<'i, Rule>,
+                ::pest::Stack<::pest::Span<'i>>
+            ),
+                ::pest::error::Error<Rule>
+            > {
+                mod rules {
+                    #![allow(clippy::upper_case_acronyms)]
+                    pub mod hidden {
+                        use super::super::Rule;
+                        #skip
+                    }
+
+                    pub mod visible {
+                        use super::super::Rule;
+                        #( #rules )*
+                    }
+
+                    pub use self::visible::*;
+                }
+
+                let ret = ::pest::state_with_stack(input, stack, |state| {
+                    match rule {
+                        #patterns
+                    }
+                });
+
+                ret
+            }
         }
     };
 

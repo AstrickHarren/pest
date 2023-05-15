@@ -9,11 +9,20 @@
 
 use crate::error::Error;
 use crate::iterators::Pairs;
-use crate::RuleType;
+use crate::{RuleType, Span, Stack};
 
 /// A trait with a single method that parses strings.
 pub trait Parser<R: RuleType> {
     /// Parses a `&str` starting from `rule`.
     #[allow(clippy::perf)]
     fn parse(rule: R, input: &str) -> Result<Pairs<'_, R>, Error<R>>;
+
+    #[allow(clippy::perf)]
+    fn parse_with_stack<'i>(
+        rule: R,
+        input: &'i str,
+        stack: Stack<Span<'i>>,
+    ) -> Result<(Pairs<'i, R>, Stack<Span<'i>>), Error<R>> {
+        unreachable!()
+    }
 }

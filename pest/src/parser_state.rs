@@ -184,6 +184,50 @@ where
     }
 }
 
+#[allow(clippy::perf)]
+pub fn state_with_stack<'i, R: RuleType, F>(
+    input: &'i str,
+    stack: Stack<Span<'i>>,
+    f: F,
+) -> Result<(pairs::Pairs<'i, R>, Stack<Span<'i>>), Error<R>>
+where
+    F: FnOnce(Box<ParserState<'i, R>>) -> ParseResult<Box<ParserState<'i, R>>>,
+{
+    let state = ParserState::new_with_stack(input, stack);
+
+    match f(state) {
+        Ok(state) => {
+            let len = state.queue.len();
+            Ok((
+                pairs::new(Rc::new(state.queue), input, None, 0, len),
+                state.stack,
+            ))
+        }
+        Err(mut state) => {
+            let variant = if state.reached_call_limit() {
+                ErrorVariant::CustomError {
+                    message: "call limit reached".to_owned(),
+                }
+            } else {
+                state.pos_attempts.sort();
+                state.pos_attempts.dedup();
+                state.neg_attempts.sort();
+                state.neg_attempts.dedup();
+                ErrorVariant::ParsingError {
+                    positives: state.pos_attempts.clone(),
+                    negatives: state.neg_attempts.clone(),
+                }
+            };
+
+            Err(Error::new_from_pos(
+                variant,
+                // TODO(performance): Guarantee state.attempt_pos is a valid position
+                position::Position::new(input, state.attempt_pos).unwrap(),
+            ))
+        }
+    }
+}
+
 impl<'i, R: RuleType> ParserState<'i, R> {
     /// Allocates a fresh `ParserState` object to the heap and returns the owned `Box`. This `Box`
     /// will be passed from closure to closure based on the needs of the specified `Parser`.
@@ -205,6 +249,20 @@ impl<'i, R: RuleType> ParserState<'i, R> {
             attempt_pos: 0,
             atomicity: Atomicity::NonAtomic,
             stack: Stack::new(),
+            call_tracker: Default::default(),
+        })
+    }
+
+    pub fn new_with_stack(input: &'i str, stack: Stack<Span<'i>>) -> Box<Self> {
+        Box::new(ParserState {
+            position: Position::from_start(input),
+            queue: vec![],
+            lookahead: Lookahead::None,
+            pos_attempts: vec![],
+            neg_attempts: vec![],
+            attempt_pos: 0,
+            atomicity: Atomicity::NonAtomic,
+            stack,
             call_tracker: Default::default(),
         })
     }
