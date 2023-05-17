@@ -1119,9 +1119,9 @@ impl<'i, R: RuleType> ParserState<'i, R> {
             Some(r) => r,
             None => return Err(self),
         };
-        // return true if an empty sequence is requested
+        // return false if an empty sequence is requested
         if range.end <= range.start {
-            return Ok(self);
+            return Err(self);
         }
 
         let mut position = self.position;
