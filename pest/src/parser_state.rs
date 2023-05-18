@@ -15,6 +15,7 @@ use alloc::vec::Vec;
 use core::num::NonZeroUsize;
 use core::ops::Range;
 use core::sync::atomic::{AtomicUsize, Ordering};
+use std::dbg;
 
 use crate::error::{Error, ErrorVariant};
 use crate::iterators::{pairs, QueueableToken};
@@ -1093,8 +1094,9 @@ impl<'i, R: RuleType> ParserState<'i, R> {
         self.match_string(string)
     }
 
-    /// Attempts to match any of the stack content. Returns `Ok(Box<ParserState>)`
-    /// if any string is matched successfully, or `Err(Box<ParserState>)` otherwise.
+    /// Attempts to match the any of the stack content starting from the longest.
+    /// Returns `Ok(Box<ParserState>)` if any string is matched successfully, or
+    /// `Err(Box<ParserState>)` otherwise.
     /// # Examples
     ///
     /// ```
@@ -1124,14 +1126,14 @@ impl<'i, R: RuleType> ParserState<'i, R> {
             return Err(self);
         }
 
-        let mut position = self.position;
+        let position = self.position;
         let result = {
-            let mut iter_b2t = self.stack[range].iter();
-            let matcher = |span: &Span<'_>| position.match_string(span.as_str());
-            iter_b2t.any(matcher)
+            let iter_b2t = self.stack[range].iter();
+            let matcher = |span: &Span<'_>| position.peek_string(span.as_str());
+            iter_b2t.filter_map(matcher).max()
         };
 
-        if result {
+        if let Some(position) = result {
             self.position = position;
             Ok(self)
         } else {
