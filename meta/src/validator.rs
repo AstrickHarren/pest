@@ -327,6 +327,7 @@ fn is_non_progressing<'i>(
             min == 0 || is_non_progressing(&inner.expr, rules, trace)
         }
         ParserExpr::Push(ref inner) => is_non_progressing(&inner.expr, rules, trace),
+        ParserExpr::Look(ref inner) => is_non_progressing(&inner.expr, rules, trace),
         ParserExpr::RepOnce(ref inner) | ParserExpr::NodeTag(ref inner, _) => {
             is_non_progressing(&inner.expr, rules, trace)
         }
@@ -419,6 +420,7 @@ fn is_non_failing<'i>(
         ParserExpr::NegPred(_) => false,
         ParserExpr::RepOnce(ref inner) => is_non_failing(&inner.expr, rules, trace),
         ParserExpr::Push(ref inner)
+        | ParserExpr::Look(ref inner)
         | ParserExpr::NodeTag(ref inner, _)
         | ParserExpr::PosPred(ref inner) => is_non_failing(&inner.expr, rules, trace),
     }

@@ -94,6 +94,7 @@ pub enum Expr {
     Skip(Vec<String>),
     /// Matches an expression and pushes it to the stack, e.g. `push(e)`
     Push(Box<Expr>),
+    Look(Box<Expr>),
     /// Matches an expression and assigns a label to it, e.g. #label = exp
     NodeTag(Box<Expr>, String),
 }

@@ -226,6 +226,7 @@ impl Vm {
                 })
             }),
             OptimizedExpr::Push(ref expr) => state.stack_push(|state| self.parse_expr(expr, state)),
+            OptimizedExpr::Look(ref expr) => state.stack_look(|state| self.parse_expr(expr, state)),
             OptimizedExpr::Skip(ref strings) => state.skip_until(
                 &strings
                     .iter()

@@ -271,4 +271,15 @@ mod tests {
             expected
         );
     }
+
+    #[test]
+    fn test_derive_peek_any() {
+        let input = quote!(
+            #[derive(Parser)]
+            #[grammar = "../tests/c0.pest"]
+            pub struct TestParser;
+        );
+
+        let token = super::derive_parser(input, true);
+    }
 }

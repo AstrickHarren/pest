@@ -158,6 +158,7 @@ pub enum ParserExpr<'i> {
     RepMinMax(Box<ParserNode<'i>>, u32, u32),
     /// Matches an expression and pushes it to the stack, e.g. `push(e)`
     Push(Box<ParserNode<'i>>),
+    Look(Box<ParserNode<'i>>),
     /// Matches an expression and assigns a label to it, e.g. #label = exp
     NodeTag(Box<ParserNode<'i>>, String),
 }
@@ -195,6 +196,7 @@ fn convert_node(node: ParserNode<'_>) -> Expr {
             Expr::RepMinMax(Box::new(convert_node(*node)), min, max)
         }
         ParserExpr::Push(node) => Expr::Push(Box::new(convert_node(*node))),
+        ParserExpr::Look(node) => Expr::Look(Box::new(convert_node(*node))),
         ParserExpr::NodeTag(node, tag) => Expr::NodeTag(Box::new(convert_node(*node)), tag),
     }
 }
@@ -377,6 +379,20 @@ fn consume_expr<'i>(
 
                         ParserNode {
                             expr: ParserExpr::Push(Box::new(node)),
+                            span: start.span(&end),
+                        }
+                    }
+                    Rule::look => {
+                        let start = pair.clone().as_span().start_pos();
+                        let mut pairs = pair.into_inner();
+                        pairs.next().unwrap(); // opening_paren
+                        let pair = pairs.next().unwrap();
+
+                        let node = consume_expr(pair.into_inner().peekable(), pratt)?;
+                        let end = node.span.end_pos();
+
+                        ParserNode {
+                            expr: ParserExpr::Look(Box::new(node)),
                             span: start.span(&end),
                         }
                     }

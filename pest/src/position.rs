@@ -413,6 +413,20 @@ impl<'i> Position<'i> {
         }
     }
 
+    /// Matches `string` from the `Posiition` and returns the updated `pos`. Do not update `pos`
+    /// in place.
+    #[inline]
+    pub(crate) fn peek_string(&self, string: &str) -> Option<Self> {
+        let to = self.pos + string.len();
+        if Some(string.as_bytes()) == self.input.as_bytes().get(self.pos..to) {
+            let mut ret = *self;
+            ret.pos = to;
+            Some(ret)
+        } else {
+            None
+        }
+    }
+
     /// Case-insensitively matches `string` from the `Position` and returns `true` if a match was
     /// made or `false` otherwise. If no match was made, `pos` will not be updated.
     #[inline]

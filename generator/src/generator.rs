@@ -584,6 +584,13 @@ fn generate_expr(expr: OptimizedExpr) -> TokenStream {
                 state.stack_push(|state| #expr)
             }
         }
+        OptimizedExpr::Look(expr) => {
+            let expr = generate_expr(*expr);
+
+            quote! {
+                state.stack_look(|state| #expr)
+            }
+        }
         OptimizedExpr::RestoreOnErr(expr) => {
             let expr = generate_expr(*expr);
 
@@ -720,6 +727,13 @@ fn generate_expr_atomic(expr: OptimizedExpr) -> TokenStream {
 
             quote! {
                 state.stack_push(|state| #expr)
+            }
+        }
+        OptimizedExpr::Look(expr) => {
+            let expr = generate_expr_atomic(*expr);
+
+            quote! {
+                state.stack_look(|state| #expr)
             }
         }
         OptimizedExpr::RestoreOnErr(expr) => {

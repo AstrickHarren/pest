@@ -15,7 +15,6 @@ use alloc::vec::Vec;
 use core::num::NonZeroUsize;
 use core::ops::Range;
 use core::sync::atomic::{AtomicUsize, Ordering};
-use std::dbg;
 
 use crate::error::{Error, ErrorVariant};
 use crate::iterators::{pairs, QueueableToken};
@@ -1060,6 +1059,30 @@ impl<'i, R: RuleType> ParserState<'i, R> {
                 let end = state.position;
                 state.stack.push(start.span(&end));
                 Ok(state)
+            }
+            Err(state) => Err(state),
+        }
+    }
+
+    pub fn stack_look<F>(mut self: Box<Self>, f: F) -> ParseResult<Box<Self>>
+    where
+        F: FnOnce(Box<Self>) -> ParseResult<Box<Self>>,
+    {
+        self = self.inc_call_check_limit()?;
+        let start = self.position;
+
+        let result = f(self);
+
+        match result {
+            Ok(state) => {
+                let end = state.position;
+                let val = start.span(&end).as_str();
+
+                if state.stack.iter().find(|x| x.as_str() == val).is_some() {
+                    Ok(state)
+                } else {
+                    Err(state)
+                }
             }
             Err(state) => Err(state),
         }

@@ -86,6 +86,10 @@ impl<T: Clone> Stack<T> {
         }
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.cache.iter()
+    }
+
     // Rewind the stack to a particular index
     fn rewind_to(&mut self, index: usize) {
         let ops_to_rewind = &self.ops[index..];
