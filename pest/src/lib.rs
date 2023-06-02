@@ -204,7 +204,7 @@
 //! // input: ab_bb_b
 //!
 //! identifier = @{ "a" ~ ("b"|"_")* ~ "b" }
-//! // matches:      a     b_bb_b       nothing -> error!      
+//! // matches:      a     b_bb_b       nothing -> error!
 //!
 //! identifier = @{ "a" ~ ("_"* ~ "b")* }
 //! // matches:      a     b, _bb, _b   in three repetitions
@@ -336,10 +336,12 @@ extern crate std;
 
 pub use crate::parser::Parser;
 pub use crate::parser_state::{
-    set_call_limit, state, Atomicity, Lookahead, MatchDir, ParseResult, ParserState,
+    set_call_limit, state, state_with_stack, Atomicity, Lookahead, MatchDir, ParseResult,
+    ParserState,
 };
 pub use crate::position::Position;
 pub use crate::span::{Lines, LinesSpan, Span};
+pub use crate::stack::Stack;
 pub use crate::token::Token;
 use core::fmt::Debug;
 use core::hash::Hash;
